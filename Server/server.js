@@ -1,6 +1,6 @@
 import express from "express";
 const { json } = express;
-import { createConnection } from "mysql2";
+import { createPool } from "mysql2";
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -34,35 +34,30 @@ app.use(json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-const db = createConnection({
+const db = createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect((err) => {
+// Verify connection and ensure refresh_tokens table exists on startup
+db.query(`
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        token VARCHAR(500) NOT NULL,
+        user_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+`, (err) => {
     if (err) {
-        console.log("Database Connection Failed");
-        console.log(err);
+        console.error("Database connection or table setup failed:", err.message);
     } else {
-        console.log("MySQL Connected");
-
-        db.query(`
-            CREATE TABLE IF NOT EXISTS refresh_tokens (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                token VARCHAR(500) NOT NULL,
-                user_id INT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `, (err) => {
-            if (err) {
-                console.error("Error creating/verifying refresh_tokens table:", err.message);
-            } else {
-                console.log("refresh_tokens table verified/created");
-            }
-        });
+        console.log("MySQL Pool connected. refresh_tokens table verified.");
     }
 });
 
@@ -678,7 +673,7 @@ app.listen(PORT, () => {
 process.on("SIGINT", () => {
     db.end((err) => {
         if (err) console.log(err);
-        else console.log("Database Connection Closed");
+        else console.log("Database Pool Closed");
         process.exit();
     });
 });
