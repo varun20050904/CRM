@@ -471,7 +471,7 @@ app.post("/meetings", authenticateToken, (req, res) => {
 
     db.query(
         "INSERT INTO meetings(company_id, meeting_date, notes, outcome, attendees, user_id) VALUES(?,?,?,?,?,?)",
-        [company_id, meeting_date, notes, outcome, attendees, req.user.id],
+        [company_id, new Date(meeting_date), notes, outcome, attendees, req.user.id],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ message: "Meeting Added", id: result.insertId });
@@ -529,7 +529,7 @@ app.put("/meetings/:id", authenticateToken, (req, res) => {
             return res.status(400).json({ error: "Invalid meeting_date format." });
         }
         fields.push("meeting_date=?");
-        values.push(req.body.meeting_date);
+        values.push(new Date(req.body.meeting_date));
     }
     if (req.body.notes) { fields.push("notes=?"); values.push(req.body.notes); }
     if (req.body.outcome) { fields.push("outcome=?"); values.push(req.body.outcome); }
@@ -588,7 +588,7 @@ app.put("/meetings/:id", authenticateToken, (req, res) => {
             if (req.body.company_id && req.body.meeting_date) {
                 db.query(
                     "UPDATE reminders SET reminder_time = ? WHERE company_id = ? AND user_id = ? AND sent = 0",
-                    [req.body.meeting_date, req.body.company_id, req.user.id],
+                    [new Date(req.body.meeting_date), req.body.company_id, req.user.id],
                     (err) => {
                         if (err) console.log("Failed to sync reminder:", err.message);
                     }
@@ -633,7 +633,7 @@ app.post("/reminders", authenticateToken, (req, res) => {
 
     db.query(
         "INSERT INTO reminders(company_id, reminder_time, email, sent, user_id) VALUES(?,?,?,?,?)",
-        [company_id, reminder_time, email, 0, req.user.id],
+        [company_id, new Date(reminder_time), email, 0, req.user.id],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ message: "Reminder Added", id: result.insertId });
@@ -677,7 +677,7 @@ app.put("/reminders/:id", authenticateToken, (req, res) => {
             return res.status(400).json({ error: "Invalid reminder_time format." });
         }
         fields.push("reminder_time=?");
-        values.push(req.body.reminder_time);
+        values.push(new Date(req.body.reminder_time));
     }
     if (req.body.email) {
         if (!isValidEmail(req.body.email)) {
