@@ -89,7 +89,12 @@ export default function RemindersView() {
         setFormSaving(true);
         setFormError('');
         try {
-            await api.post('/reminders', formData);
+            const localDate = new Date(formData.reminder_time);
+            const payload = {
+                ...formData,
+                reminder_time: localDate.toISOString()
+            };
+            await api.post('/reminders', payload);
             showSuccess('Reminder scheduled successfully.');
             setShowAddModal(false);
             fetchData();

@@ -146,10 +146,11 @@ export default function MeetingsView() {
         }
 
         try {
+            const localDate = new Date(rescheduleDate);
             // Keep all existing details, just change the date
             const payload = {
                 company_id: selectedMeeting.company_id,
-                meeting_date: rescheduleDate,
+                meeting_date: localDate.toISOString(),
                 notes: selectedMeeting.notes || '',
                 outcome: selectedMeeting.outcome || '',
                 attendees: selectedMeeting.attendees || '',
@@ -177,8 +178,10 @@ export default function MeetingsView() {
         setFormSaving(true);
         setFormError('');
         try {
+            const localDate = new Date(formData.meeting_date);
             const payload = {
                 ...formData,
+                meeting_date: localDate.toISOString(),
                 notes: JSON.stringify(formData.notes) // serialize notes array
             };
 
