@@ -7,8 +7,21 @@ import bcrypt from 'bcryptjs';
 import cron from 'node-cron';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
+
+// Environment validation on startup
+const required = ["JWT_SECRET", "REFRESH_SECRET", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME", "PORT"];
+required.forEach(key => {
+    if (!process.env[key]) {
+        console.error(`Missing required env variable: ${key}`);
+        process.exit(1);
+    }
+});
 
 const SECRET_KEY = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
@@ -30,9 +43,37 @@ const isValidDate = (dateStr) => {
     return !isNaN(timestamp);
 };
 
+// Security + Performance middleware
+app.use(helmet());
+app.use(compression());
+app.use(morgan("dev"));
 app.use(json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Rate Limiters
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { error: "Too many requests, please try again later" }
+});
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: "Too many login attempts, please try again later" }
+});
+
+app.use(globalLimiter);
+
+// Health Check
+app.get("/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date() });
+});
 
 const db = createPool({
     host: process.env.DB_HOST,
@@ -46,7 +87,7 @@ const db = createPool({
     timezone: 'Z'
 });
 
-// Auto-create all tables on startup if they don't exist
+// Auto-create all tables on startup
 const createTablesSQL = `
     CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -104,7 +145,6 @@ const createTablesSQL = `
     );
 `;
 
-// Run each statement separately
 const tables = createTablesSQL.split(';').map(s => s.trim()).filter(s => s.length > 0);
 let completed = 0;
 tables.forEach((sql) => {
@@ -115,6 +155,20 @@ tables.forEach((sql) => {
             completed++;
             if (completed === tables.length) {
                 console.log("All tables verified/created successfully.");
+
+                // Add indexes after tables are created
+                const indexes = [
+                    "CREATE INDEX IF NOT EXISTS idx_companies_user_id ON companies(user_id)",
+                    "CREATE INDEX IF NOT EXISTS idx_meetings_user_id ON meetings(user_id)",
+                    "CREATE INDEX IF NOT EXISTS idx_reminders_user_sent ON reminders(user_id, sent)",
+                ];
+                indexes.forEach(sql => {
+                    db.query(sql, (err) => {
+                        if (err && !err.message.includes("Duplicate key name")) {
+                            console.error("Index error:", err.message);
+                        }
+                    });
+                });
             }
         }
     });
@@ -132,7 +186,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Auth Routes
-app.post("/login", (req, res) => {
+app.post("/login", loginLimiter, (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -283,8 +337,8 @@ app.put("/settings", authenticateToken, (req, res) => {
     );
 });
 
-// Cron Job - per user smtp
-cron.schedule("* * * * *", () => {
+// Cron Job - every 2 minutes, per user smtp
+cron.schedule("*/2 * * * *", () => {
     const now = new Date();
 
     db.query(
@@ -358,9 +412,13 @@ app.post("/companies", authenticateToken, (req, res) => {
 });
 
 app.get("/companies", authenticateToken, (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
     db.query(
-        "SELECT * FROM companies WHERE user_id = ? ORDER BY id DESC",
-        [req.user.id],
+        "SELECT * FROM companies WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?",
+        [req.user.id, limit, offset],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(result);
@@ -480,13 +538,18 @@ app.post("/meetings", authenticateToken, (req, res) => {
 });
 
 app.get("/meetings", authenticateToken, (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
     db.query(
         `SELECT meetings.*, companies.company_name, companies.contact_person 
          FROM meetings 
          LEFT JOIN companies ON meetings.company_id = companies.id 
          WHERE meetings.user_id = ?
-         ORDER BY meeting_date ASC`,
-        [req.user.id],
+         ORDER BY meeting_date ASC
+         LIMIT ? OFFSET ?`,
+        [req.user.id, limit, offset],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(result);
@@ -534,7 +597,7 @@ app.put("/meetings/:id", authenticateToken, (req, res) => {
     if (req.body.notes) { fields.push("notes=?"); values.push(req.body.notes); }
     if (req.body.outcome) { fields.push("outcome=?"); values.push(req.body.outcome); }
     if (req.body.attendees) { fields.push("attendees=?"); values.push(req.body.attendees); }
-    if (req.body.attendees === '') { fields.push("attendees=?"); values.push(''); } // Allow clearing
+    if (req.body.attendees === '') { fields.push("attendees=?"); values.push(''); }
 
     if (fields.length === 0) {
         return res.status(400).json({ error: "No fields provided to update" });
@@ -550,7 +613,6 @@ app.put("/meetings/:id", authenticateToken, (req, res) => {
             if (err) return res.status(500).json({ error: err.message });
             if (result.affectedRows === 0) return res.status(404).json({ error: "Meeting not found" });
 
-            // If flag is set, send a notification email
             if (req.body.send_reschedule_email && req.body.meeting_date) {
                 db.query(
                     `SELECT users.smtp_email, users.smtp_pass, companies.email AS company_email, companies.company_name 
@@ -584,7 +646,6 @@ app.put("/meetings/:id", authenticateToken, (req, res) => {
                 );
             }
 
-            // Sync with reminders table if applicable
             if (req.body.company_id && req.body.meeting_date) {
                 db.query(
                     "UPDATE reminders SET reminder_time = ? WHERE company_id = ? AND user_id = ? AND sent = 0",
@@ -642,13 +703,18 @@ app.post("/reminders", authenticateToken, (req, res) => {
 });
 
 app.get("/reminders", authenticateToken, (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
     db.query(
         `SELECT reminders.*, companies.company_name 
          FROM reminders 
          LEFT JOIN companies ON reminders.company_id = companies.id 
          WHERE reminders.user_id = ?
-         ORDER BY reminder_time ASC`,
-        [req.user.id],
+         ORDER BY reminder_time ASC
+         LIMIT ? OFFSET ?`,
+        [req.user.id, limit, offset],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(result);
@@ -725,7 +791,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server Running on Port ${PORT}`);
 });
 
