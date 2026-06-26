@@ -36,7 +36,7 @@ export default function MeetingsView() {
     const [newNote, setNewNote] = useState('');
     const [formError, setFormError] = useState('');
     const [formSaving, setFormSaving] = useState(false);
-
+    const [isSummarizing, setIsSummarizing] = useState(false);
     useEffect(() => {
         fetchData();
     }, []);
@@ -215,6 +215,38 @@ export default function MeetingsView() {
         }
     };
 
+    const handleSummarizeNotes = async () => {
+        const allNotesText = [...formData.notes, newNote.trim()].filter(Boolean).join('\n\n');
+        
+        if (!allNotesText) {
+            setFormError("No notes to summarize.");
+            return;
+        }
+        
+        setIsSummarizing(true);
+        setFormError('');
+        
+        try {
+            const res = await api.post('/ai/summarize', { notes: allNotesText });
+            const summaryText = "Summary:\n" + res.data.summary;
+            
+            setFormData(prev => {
+                const currentNotes = [...prev.notes];
+                if (newNote.trim()) {
+                    currentNotes.push(newNote.trim());
+                }
+                currentNotes.push(summaryText);
+                return { ...prev, notes: currentNotes };
+            });
+            setNewNote('');
+        } catch (err) {
+            console.error("Summarize error:", err);
+            setFormError('Failed to summarize notes.');
+        } finally {
+            setIsSummarizing(false);
+        }
+    };
+
     return (
         <div className="space-y-6 animate-fadeIn">
             {/* Header */}
@@ -256,11 +288,42 @@ export default function MeetingsView() {
 
             {/* Meetings Grid / Table */}
             {loading ? (
-                <div className="flex items-center justify-center min-h-[300px]">
-                    <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-100/85 text-left">
+                            <thead className="bg-slate-50/70">
+                                <tr>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-450">Company Name</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Attendees</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Date & Time</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Discussion Notes</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Outcome</th>
+                                    <th className="px-6 py-4.5 text-right text-xs font-bold uppercase tracking-wider text-slate-455">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100/70">
+                                {[1, 2, 3, 4].map(i => (
+                                    <tr key={i}>
+                                        <td className="px-6 py-5"><div className="h-4 bg-slate-200 rounded-md w-28"></div></td>
+                                        <td className="px-6 py-5 space-y-2">
+                                            <div className="h-3.5 bg-slate-200 rounded-sm w-24"></div>
+                                            <div className="h-3 bg-slate-200 rounded-sm w-36"></div>
+                                        </td>
+                                        <td className="px-6 py-5 space-y-2">
+                                            <div className="h-3.5 bg-slate-200 rounded-sm w-28"></div>
+                                            <div className="h-3 bg-slate-200 rounded-sm w-20"></div>
+                                        </td>
+                                        <td className="px-6 py-5 space-y-1.5">
+                                            <div className="h-3.5 bg-slate-200 rounded-sm w-44"></div>
+                                            <div className="h-3 bg-slate-200 rounded-sm w-32"></div>
+                                        </td>
+                                        <td className="px-6 py-5"><div className="h-4 bg-slate-200 rounded-md w-24"></div></td>
+                                        <td className="px-6 py-5 text-right"><div className="h-8 bg-slate-200 rounded-full w-8 ml-auto"></div></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             ) : meetings.length === 0 ? (
                 <div className="glass-panel rounded-2xl shadow-xs py-16 text-center border border-slate-100">
@@ -515,6 +578,14 @@ export default function MeetingsView() {
                                             className="px-4 py-3 bg-indigo-100 text-indigo-700 font-bold text-sm rounded-xl hover:bg-indigo-200 transition-all shadow-sm h-[66px] flex items-center justify-center cursor-pointer"
                                         >
                                             Add
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleSummarizeNotes}
+                                            disabled={isSummarizing}
+                                            className="px-4 py-3 bg-white text-indigo-600 border border-indigo-200 font-bold text-sm rounded-xl hover:bg-indigo-50 transition-all shadow-sm h-[66px] flex items-center justify-center cursor-pointer disabled:opacity-70 flex-shrink-0"
+                                        >
+                                            {isSummarizing ? 'Summarizing...' : 'Summarize Notes'}
                                         </button>
                                     </div>
                                 </div>

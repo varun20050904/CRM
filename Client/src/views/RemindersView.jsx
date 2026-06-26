@@ -16,10 +16,19 @@ export default function RemindersView() {
     const [formData, setFormData] = useState({
         company_id: '',
         reminder_time: '',
-        email: ''
+        email: '',
+        draft_body: ''
     });
     const [formError, setFormError] = useState('');
     const [formSaving, setFormSaving] = useState(false);
+
+    // AI Email Drafter
+    const [draftCompanyId, setDraftCompanyId] = useState('');
+    const [draftTone, setDraftTone] = useState('professional');
+    const [draftResult, setDraftResult] = useState('');
+    const [isDrafting, setIsDrafting] = useState(false);
+    const [draftError, setDraftError] = useState('');
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -34,13 +43,36 @@ export default function RemindersView() {
                 api.get('/companies')
             ]);
             setReminders(remindersRes.data || []);
-            setCompanies(companiesRes.data || []);
+            const cos = companiesRes.data || [];
+            setCompanies(cos);
+            if (cos.length > 0) setDraftCompanyId(String(cos[0].id));
         } catch (err) {
             console.error("Fetch reminders data error:", err);
             setError('Failed to load reminders list.');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDraftEmail = async () => {
+        if (!draftCompanyId) { setDraftError('Please select a company.'); return; }
+        setIsDrafting(true);
+        setDraftError('');
+        setDraftResult('');
+        try {
+            const res = await api.post('/ai/draft-email', { company_id: parseInt(draftCompanyId, 10), tone: draftTone });
+            setDraftResult(res.data.draft || '');
+        } catch (err) {
+            setDraftError(err.response?.data?.error || 'Failed to generate email draft.');
+        } finally {
+            setIsDrafting(false);
+        }
+    };
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(draftResult);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const showSuccess = (msg) => {
@@ -72,7 +104,20 @@ export default function RemindersView() {
         setFormData({
             company_id: defaultCo ? defaultCo.id : '',
             reminder_time: '',
-            email: defaultCo ? defaultCo.email : ''
+            email: defaultCo ? defaultCo.email : '',
+            draft_body: ''
+        });
+        setFormError('');
+        setShowAddModal(true);
+    };
+
+    const openScheduleWithDraft = () => {
+        const selectedCo = companies.find(c => String(c.id) === String(draftCompanyId));
+        setFormData({
+            company_id: selectedCo ? selectedCo.id : '',
+            reminder_time: '',
+            email: selectedCo ? selectedCo.email : '',
+            draft_body: draftResult
         });
         setFormError('');
         setShowAddModal(true);
@@ -92,7 +137,8 @@ export default function RemindersView() {
             const localDate = new Date(formData.reminder_time);
             const payload = {
                 ...formData,
-                reminder_time: localDate.toISOString()
+                reminder_time: localDate.toISOString(),
+                draft_body: formData.draft_body || undefined
             };
             await api.post('/reminders', payload);
             showSuccess('Reminder scheduled successfully.');
@@ -120,6 +166,96 @@ export default function RemindersView() {
 
     return (
         <div className="space-y-6 animate-fadeIn">
+
+            {/* AI Email Drafter Panel */}
+            <div className="glass-panel rounded-2xl border border-slate-100/70 shadow-xs overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                    <div className="p-2 bg-indigo-50 rounded-lg">
+                        <svg className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 className="text-sm font-bold text-slate-900">AI Email Drafter</h2>
+                        <p className="text-xs text-slate-500">Generate a tailored follow-up email based on meeting history.</p>
+                    </div>
+                </div>
+                <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-2">
+                            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Company</label>
+                            <select
+                                value={draftCompanyId}
+                                onChange={e => setDraftCompanyId(e.target.value)}
+                                disabled={companies.length === 0}
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all font-semibold appearance-none"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                            >
+                                {companies.map(c => <option key={c.id} value={c.id}>{c.company_name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Tone</label>
+                            <select
+                                value={draftTone}
+                                onChange={e => setDraftTone(e.target.value)}
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all font-semibold appearance-none"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                            >
+                                <option value="professional">Professional</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="formal">Formal</option>
+                                <option value="follow-up">Follow-up</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {draftError && (
+                        <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 p-3 rounded-xl">{draftError}</div>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={handleDraftEmail}
+                        disabled={isDrafting || companies.length === 0}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                        {isDrafting ? (
+                            <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>Drafting...</>
+                        ) : (
+                            <><svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Generate Draft</>
+                        )}
+                    </button>
+
+                    {draftResult && (
+                        <div className="relative mt-2">
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono">
+                                {draftResult}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleCopy}
+                                className="absolute top-3 right-3 px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-all shadow-sm cursor-pointer"
+                            >
+                                {copied ? '✓ Copied' : 'Copy'}
+                            </button>
+                        </div>
+                    )}
+                    {draftResult && (
+                        <button
+                            type="button"
+                            onClick={openScheduleWithDraft}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-all cursor-pointer"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Schedule to Send
+                        </button>
+                    )}
+                </div>
+            </div>
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -158,11 +294,31 @@ export default function RemindersView() {
 
             {/* Reminders List */}
             {loading ? (
-                <div className="flex items-center justify-center min-h-[300px]">
-                    <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-100/85 text-left">
+                            <thead className="bg-slate-50/70">
+                                <tr>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-450">Company Link</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Scheduled Trigger Time</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Recipient Email</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-455">Delivery Status</th>
+                                    <th className="px-6 py-4.5 text-right text-xs font-bold uppercase tracking-wider text-slate-455">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100/70">
+                                {[1, 2, 3].map(i => (
+                                    <tr key={i}>
+                                        <td className="px-6 py-5"><div className="h-4 bg-slate-200 rounded-md w-28"></div></td>
+                                        <td className="px-6 py-5"><div className="h-4 bg-slate-200 rounded-md w-40"></div></td>
+                                        <td className="px-6 py-5"><div className="h-3.5 bg-slate-200 rounded-sm w-36"></div></td>
+                                        <td className="px-6 py-5"><div className="h-6 bg-slate-200 rounded-full w-20"></div></td>
+                                        <td className="px-6 py-5 text-right"><div className="h-8 bg-slate-200 rounded-full w-8 ml-auto"></div></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             ) : reminders.length === 0 ? (
                 <div className="glass-panel rounded-2xl shadow-xs py-16 text-center border border-slate-100">

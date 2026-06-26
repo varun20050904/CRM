@@ -244,11 +244,34 @@ export default function CompaniesView() {
 
             {/* Companies Grid / Table */}
             {loading ? (
-                <div className="flex items-center justify-center min-h-[300px]">
-                    <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-100/85 text-left">
+                            <thead className="bg-slate-50/70">
+                                <tr>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-450">Company Details</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-450">Contact Person</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-450">Email & Phone</th>
+                                    <th className="px-6 py-4.5 text-xs font-bold uppercase tracking-wider text-slate-450">Pipeline Stage</th>
+                                    <th className="px-6 py-4.5 text-right text-xs font-bold uppercase tracking-wider text-slate-450">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100/70">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <tr key={i}>
+                                        <td className="px-6 py-5"><div className="h-4 bg-slate-200 rounded-md w-32"></div></td>
+                                        <td className="px-6 py-5"><div className="h-4 bg-slate-200 rounded-md w-24"></div></td>
+                                        <td className="px-6 py-5 space-y-2">
+                                            <div className="h-3.5 bg-slate-200 rounded-sm w-40"></div>
+                                            <div className="h-3 bg-slate-200 rounded-sm w-28"></div>
+                                        </td>
+                                        <td className="px-6 py-5"><div className="h-7 bg-slate-200 rounded-full w-24"></div></td>
+                                        <td className="px-6 py-5 text-right"><div className="h-8 bg-slate-200 rounded-full w-8 ml-auto"></div></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             ) : filteredCompanies.length === 0 ? (
                 <div className="glass-panel rounded-2xl shadow-xs py-16 text-center border border-slate-100">

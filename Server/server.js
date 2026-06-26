@@ -11,11 +11,14 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import Groq from 'groq-sdk';
 
 dotenv.config();
 
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 // Environment validation on startup
-const required = ["JWT_SECRET", "REFRESH_SECRET", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME", "PORT"];
+const required = ["JWT_SECRET", "REFRESH_SECRET", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME", "PORT", "GROQ_API_KEY"];
 required.forEach(key => {
     if (!process.env[key]) {
         console.error(`Missing required env variable: ${key}`);
@@ -57,14 +60,14 @@ app.use(cors({
 
 // Rate Limiters
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+    max: parseInt(process.env.RATE_LIMIT_MAX) || 100,
     message: { error: "Too many requests, please try again later" }
 });
 
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+    max: parseInt(process.env.LOGIN_LIMIT_MAX) || 10,
     message: { error: "Too many login attempts, please try again later" }
 });
 
@@ -82,7 +85,7 @@ const db = createPool({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
     queueLimit: 0,
     timezone: 'Z'
 });
@@ -130,6 +133,7 @@ const createTablesSQL = `
         reminder_time DATETIME NOT NULL,
         email VARCHAR(255) NOT NULL,
         sent TINYINT DEFAULT 0,
+        draft_body TEXT DEFAULT NULL,
         user_id INT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
@@ -158,16 +162,25 @@ tables.forEach((sql) => {
 
                 // Add indexes after tables are created
                 const indexes = [
-                    "CREATE INDEX IF NOT EXISTS idx_companies_user_id ON companies(user_id)",
-                    "CREATE INDEX IF NOT EXISTS idx_meetings_user_id ON meetings(user_id)",
-                    "CREATE INDEX IF NOT EXISTS idx_reminders_user_sent ON reminders(user_id, sent)",
+                    { name: "idx_companies_user_id", sql: "CREATE INDEX idx_companies_user_id ON companies(user_id)" },
+                    { name: "idx_meetings_user_id", sql: "CREATE INDEX idx_meetings_user_id ON meetings(user_id)" },
+                    { name: "idx_reminders_user_sent", sql: "CREATE INDEX idx_reminders_user_sent ON reminders(user_id, sent)" },
                 ];
-                indexes.forEach(sql => {
-                    db.query(sql, (err) => {
-                        if (err && !err.message.includes("Duplicate key name")) {
-                            console.error("Index error:", err.message);
+
+                indexes.forEach(({ name, sql }) => {
+                    db.query(
+                        `SELECT COUNT(*) AS count FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = ?`,
+                        [name],
+                        (err, result) => {
+                            if (err) return console.error("Index check error:", err.message);
+                            if (result[0].count === 0) {
+                                db.query(sql, (err) => {
+                                    if (err) console.error("Index creation error:", err.message);
+                                    else console.log(`Index ${name} created successfully`);
+                                });
+                            }
                         }
-                    });
+                    );
                 });
             }
         }
@@ -208,12 +221,12 @@ app.post("/login", loginLimiter, (req, res) => {
         const token = jwt.sign(
             { id: user.id, email: user.email, name: user.name || "" },
             SECRET_KEY,
-            { expiresIn: "15m" }
+            { expiresIn: process.env.JWT_EXPIRES_IN || "15m" }
         );
         const refreshToken = jwt.sign(
             { id: user.id, email: user.email },
             REFRESH_SECRET,
-            { expiresIn: "7d" }
+            { expiresIn: process.env.REFRESH_EXPIRES_IN || "7d" }
         );
 
         db.query(
@@ -283,7 +296,7 @@ app.post("/token", (req, res) => {
                 const accessToken = jwt.sign(
                     { id: dbUser.id, email: dbUser.email, name: dbUser.name || "" },
                     SECRET_KEY,
-                    { expiresIn: "15m" }
+                    { expiresIn: process.env.JWT_EXPIRES_IN || "15m" }
                 );
                 res.json({ token: accessToken });
             });
@@ -338,13 +351,14 @@ app.put("/settings", authenticateToken, (req, res) => {
 });
 
 // Cron Job - every 2 minutes, per user smtp
-cron.schedule("*/2 * * * *", () => {
+cron.schedule(process.env.CRON_SCHEDULE || "*/2 * * * *", () => {
     const now = new Date();
 
     db.query(
-        `SELECT reminders.*, users.smtp_email, users.smtp_pass 
-         FROM reminders 
-         LEFT JOIN users ON reminders.user_id = users.id 
+        `SELECT reminders.*, companies.company_name, users.smtp_email, users.smtp_pass
+         FROM reminders
+         LEFT JOIN users ON reminders.user_id = users.id
+         LEFT JOIN companies ON reminders.company_id = companies.id
          WHERE reminders.reminder_time <= ? AND reminders.sent = 0`,
         [now],
         (err, results) => {
@@ -358,24 +372,38 @@ cron.schedule("*/2 * * * *", () => {
                 }
 
                 const userTransporter = nodemailer.createTransport({
-                    service: "gmail",
+                    service: process.env.EMAIL_SERVICE || "gmail",
                     auth: {
                         user: reminder.smtp_email,
                         pass: reminder.smtp_pass
                     }
                 });
 
+                // Use AI draft body if saved, otherwise fall back to generic message
+                const emailBody = reminder.draft_body
+                    ? reminder.draft_body
+                    : `Hi,\n\nYou have a meeting reminder for ${reminder.company_name || 'your client'}.\nScheduled at: ${new Date(reminder.reminder_time).toLocaleString()}\n\nBest regards,\nYour CRM`;
+
+                // Extract subject from draft (first line if it starts with "Subject:")
+                let subject = `CRM Reminder – ${reminder.company_name || 'Meeting'}`;
+                let body = emailBody;
+                if (emailBody.toLowerCase().startsWith('subject:')) {
+                    const lines = emailBody.split('\n');
+                    subject = lines[0].replace(/^subject:\s*/i, '').trim();
+                    body = lines.slice(1).join('\n').trim();
+                }
+
                 const mailOptions = {
                     from: reminder.smtp_email,
                     to: reminder.email,
-                    subject: "CRM Meeting Reminder",
-                    text: `Hi, you have a meeting reminder. Company ID: ${reminder.company_id}. Scheduled at: ${reminder.reminder_time}`
+                    subject,
+                    text: body
                 };
 
                 userTransporter.sendMail(mailOptions, (err) => {
                     if (err) return console.log("Email error:", err.message);
                     db.query("UPDATE reminders SET sent = 1 WHERE id = ?", [reminder.id]);
-                    console.log("Email sent to:", reminder.email);
+                    console.log(`Email sent to: ${reminder.email} | Draft: ${!!reminder.draft_body}`);
                 });
             });
         }
@@ -626,7 +654,7 @@ app.put("/meetings/:id", authenticateToken, (req, res) => {
                             const info = results[0];
                             if (info.smtp_email && info.smtp_pass && info.company_email) {
                                 const userTransporter = nodemailer.createTransport({
-                                    service: "gmail",
+                                    service: process.env.EMAIL_SERVICE || "gmail",
                                     auth: { user: info.smtp_email, pass: info.smtp_pass }
                                 });
                                 const formattedDate = new Date(req.body.meeting_date).toLocaleString();
@@ -678,7 +706,7 @@ app.post("/reminders", authenticateToken, (req, res) => {
     if (!req.body) {
         return res.status(400).json({ error: "Request body is missing." });
     }
-    const { company_id, reminder_time, email } = req.body;
+    const { company_id, reminder_time, email, draft_body } = req.body;
 
     if (!company_id || !reminder_time || !email) {
         return res.status(400).json({ error: "company_id, reminder_time and email are required" });
@@ -693,8 +721,8 @@ app.post("/reminders", authenticateToken, (req, res) => {
     }
 
     db.query(
-        "INSERT INTO reminders(company_id, reminder_time, email, sent, user_id) VALUES(?,?,?,?,?)",
-        [company_id, new Date(reminder_time), email, 0, req.user.id],
+        "INSERT INTO reminders(company_id, reminder_time, email, sent, draft_body, user_id) VALUES(?,?,?,?,?,?)",
+        [company_id, new Date(reminder_time), email, 0, draft_body || null, req.user.id],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ message: "Reminder Added", id: result.insertId });
@@ -781,6 +809,97 @@ app.delete("/reminders/:id", authenticateToken, (req, res) => {
             if (err) return res.status(500).json({ error: err.message });
             if (result.affectedRows === 0) return res.status(404).json({ error: "Reminder not found" });
             res.json({ message: "Reminder Deleted" });
+        }
+    );
+});
+
+// AI Routes
+app.post("/ai/summarize", authenticateToken, async (req, res) => {
+    const { notes } = req.body;
+    if (!notes) return res.status(400).json({ error: "Notes are required" });
+
+    try {
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a professional assistant. Please summarize the following meeting notes and provide a clear bulleted list of Action Items. Keep it concise."
+                },
+                {
+                    role: "user",
+                    content: notes
+                }
+            ],
+            model: process.env.GROQ_MODEL || "llama-3.1-8b-instant"
+        });
+
+        res.json({ summary: chatCompletion.choices[0]?.message?.content || "" });
+    } catch (error) {
+        console.error("Groq Error:", error);
+        res.status(500).json({ error: "Failed to summarize notes." });
+    }
+});
+
+app.post("/ai/draft-email", authenticateToken, async (req, res) => {
+    const { company_id, tone } = req.body;
+    if (!company_id) return res.status(400).json({ error: "company_id is required" });
+
+    // Fetch company info + last 5 meetings
+    db.query(
+        `SELECT company_name, contact_person, email FROM companies WHERE id = ? AND user_id = ?`,
+        [company_id, req.user.id],
+        (err, companyResult) => {
+            if (err || companyResult.length === 0)
+                return res.status(404).json({ error: "Company not found" });
+
+            const company = companyResult[0];
+
+            db.query(
+                `SELECT notes, outcome, meeting_date FROM meetings WHERE company_id = ? AND user_id = ? ORDER BY meeting_date DESC LIMIT 5`,
+                [company_id, req.user.id],
+                async (err, meetings) => {
+                    if (err) return res.status(500).json({ error: err.message });
+
+                    let meetingContext = "No meeting history available.";
+                    if (meetings.length > 0) {
+                        meetingContext = meetings.map((m, i) => {
+                            let notes = "";
+                            try {
+                                const parsed = JSON.parse(m.notes);
+                                notes = Array.isArray(parsed) ? parsed.join(" | ") : m.notes;
+                            } catch { notes = m.notes || ""; }
+                            const date = new Date(m.meeting_date).toLocaleDateString();
+                            return `Meeting ${i + 1} (${date}): Notes: ${notes}. Outcome: ${m.outcome || "N/A"}`;
+                        }).join("\n");
+                    }
+
+                    const selectedTone = tone || "professional";
+                    const senderName = req.user.name || "The Team";
+                    const prompt = `You are a business communication expert. Draft a concise, ${selectedTone} follow-up email to ${company.contact_person || "the client"} at ${company.company_name}.
+
+Recent meeting history:
+${meetingContext}
+
+Guidelines:
+- Keep it under 200 words
+- Reference the most recent interaction naturally
+- End with a clear next step or call-to-action
+- Use a ${selectedTone} tone
+- Sign off the email with the name: ${senderName}
+- Output only the email body (Subject line + body). Do not include any extra explanation.`;
+
+                    try {
+                        const chatCompletion = await groq.chat.completions.create({
+                            messages: [{ role: "user", content: prompt }],
+                            model: process.env.GROQ_MODEL || "llama-3.1-8b-instant"
+                        });
+                        res.json({ draft: chatCompletion.choices[0]?.message?.content || "" });
+                    } catch (error) {
+                        console.error("Groq Draft Error:", error);
+                        res.status(500).json({ error: "Failed to draft email." });
+                    }
+                }
+            );
         }
     );
 });

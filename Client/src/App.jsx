@@ -102,9 +102,9 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen flex bg-slate-50 text-slate-900 font-sans">
-            {/* Sidebar Desktop */}
-            <aside className="hidden md:flex flex-col w-64 bg-slate-950 text-slate-400 border-r border-slate-900 flex-shrink-0">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+            {/* Sidebar Desktop - fixed, never scrolls */}
+            <aside className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-64 bg-slate-950 text-slate-400 border-r border-slate-900 z-30">
                 <div className="h-20 flex items-center px-6 border-b border-slate-900 gap-3">
                     <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-indigo-500/30">
                         CT
@@ -211,8 +211,8 @@ function App() {
                 )}
             </aside>
 
-            {/* Mobile Nav Topbar */}
-            <div className="flex flex-col flex-1 min-w-0">
+            {/* Right side: mobile topbar + main content, offset by sidebar width on desktop */}
+            <div className="flex flex-col min-h-screen md:ml-64">
                 <header className="md:hidden h-16 bg-slate-950 text-white flex items-center justify-between px-6 border-b border-slate-900 flex-shrink-0 z-20">
                     <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-sm">

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 export default function DashboardView() {
     const [stats, setStats] = useState({
@@ -12,6 +16,10 @@ export default function DashboardView() {
     const [recentCompanies, setRecentCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [chartData, setChartData] = useState({
+        meetingsPerMonth: [],
+        companiesByStage: []
+    });
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -38,6 +46,32 @@ export default function DashboardView() {
                 // Grab recent items
                 setRecentMeetings(meetings.slice(0, 5));
                 setRecentCompanies(companies.slice(0, 5));
+
+                // Process chart data
+                const stageCounts = {};
+                companies.forEach(c => {
+                    stageCounts[c.stage || 'Lead'] = (stageCounts[c.stage || 'Lead'] || 0) + 1;
+                });
+                const companiesByStage = Object.keys(stageCounts).map(key => ({
+                    name: key,
+                    value: stageCounts[key]
+                }));
+
+                const monthCounts = {};
+                meetings.forEach(m => {
+                    const date = new Date(m.meeting_date);
+                    const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                    monthCounts[month] = (monthCounts[month] || 0) + 1;
+                });
+                const meetingsPerMonth = Object.keys(monthCounts).map(key => ({
+                    name: key,
+                    meetings: monthCounts[key]
+                }));
+
+                setChartData({
+                    meetingsPerMonth,
+                    companiesByStage
+                });
             } catch (err) {
                 console.error("Dashboard error:", err);
                 setError('Failed to fetch dashboard data. Please try again later.');
@@ -51,11 +85,55 @@ export default function DashboardView() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <svg className="animate-spin h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+            <div className="space-y-8 animate-pulse">
+                {/* Header Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-8 bg-slate-200 rounded-lg w-1/4"></div>
+                    <div className="h-4 bg-slate-200 rounded-lg w-1/3"></div>
+                </div>
+
+                {/* Metrics Cards Skeleton */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="glass-panel p-6 rounded-2xl flex items-center space-x-4 shadow-xs">
+                            <div className="h-12 w-12 bg-slate-200 rounded-xl"></div>
+                            <div className="flex-1 space-y-2">
+                                <div className="h-3 bg-slate-200 rounded-sm w-2/3"></div>
+                                <div className="h-6 bg-slate-200 rounded-md w-1/2"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Charts Skeleton */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {[1, 2].map(i => (
+                        <div key={i} className="glass-panel p-6 rounded-2xl h-80 flex flex-col justify-between">
+                            <div className="h-5 bg-slate-200 rounded-md w-1/3 mb-4"></div>
+                            <div className="flex-1 bg-slate-100 rounded-xl"></div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Lists Skeleton */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {[1, 2].map(i => (
+                        <div key={i} className="glass-panel p-6 rounded-2xl space-y-4">
+                            <div className="h-5 bg-slate-200 rounded-md w-1/3"></div>
+                            <div className="space-y-3">
+                                {[1, 2, 3].map(j => (
+                                    <div key={j} className="flex justify-between items-center py-2 border-b border-slate-100">
+                                        <div className="space-y-2 flex-1">
+                                            <div className="h-4 bg-slate-200 rounded-md w-1/2"></div>
+                                            <div className="h-3 bg-slate-200 rounded-sm w-1/3"></div>
+                                        </div>
+                                        <div className="h-4 bg-slate-200 rounded-md w-12"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -128,6 +206,60 @@ export default function DashboardView() {
                         <p className="text-xs text-slate-450 font-semibold uppercase tracking-wider">Pending Alerts</p>
                         <p className="text-3xl font-black text-slate-900 mt-0.5">{stats.pendingReminders}</p>
                     </div>
+                </div>
+            </div>
+
+            {/* Analytics Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Meetings Bar Chart */}
+                <div className="glass-panel p-6 rounded-2xl shadow-xs h-80 flex flex-col">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4">Meetings Over Time</h3>
+                    {chartData.meetingsPerMonth.length === 0 ? (
+                        <p className="text-sm text-slate-500 italic flex-1 flex items-center justify-center">No meeting data available.</p>
+                    ) : (
+                        <div className="flex-1 min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={chartData.meetingsPerMonth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} allowDecimals={false} />
+                                    <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                    <Bar dataKey="meetings" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </div>
+
+                {/* Companies Pie Chart */}
+                <div className="glass-panel p-6 rounded-2xl shadow-xs h-80 flex flex-col">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4">Companies by Stage</h3>
+                    {chartData.companiesByStage.length === 0 ? (
+                        <p className="text-sm text-slate-500 italic flex-1 flex items-center justify-center">No company data available.</p>
+                    ) : (
+                        <div className="flex-1 min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={chartData.companiesByStage}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {chartData.companiesByStage.map((entry, index) => {
+                                            const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
+                                            return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                                        })}
+                                    </Pie>
+                                    <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
                 </div>
             </div>
 
