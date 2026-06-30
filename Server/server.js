@@ -90,6 +90,10 @@ const db = createPool({
     timezone: 'Z'
 });
 
+const dbPromise = db.promise();
+
+const runStartupQuery = (sql, params = []) => dbPromise.query(sql, params);
+
 // Auto-create all tables on startup
 const createTablesSQL = `
     CREATE TABLE IF NOT EXISTS users (
@@ -149,43 +153,54 @@ const createTablesSQL = `
     );
 `;
 
-const tables = createTablesSQL.split(';').map(s => s.trim()).filter(s => s.length > 0);
-let completed = 0;
-tables.forEach((sql) => {
-    db.query(sql, (err) => {
-        if (err) {
+const initializeDatabase = async () => {
+    const tables = createTablesSQL.split(';').map(s => s.trim()).filter(s => s.length > 0);
+
+    for (const sql of tables) {
+        try {
+            await runStartupQuery(sql);
+        } catch (err) {
             console.error("Table setup error:", err.message);
-        } else {
-            completed++;
-            if (completed === tables.length) {
-                console.log("All tables verified/created successfully.");
-
-                // Add indexes after tables are created
-                const indexes = [
-                    { name: "idx_companies_user_id", sql: "CREATE INDEX idx_companies_user_id ON companies(user_id)" },
-                    { name: "idx_meetings_user_id", sql: "CREATE INDEX idx_meetings_user_id ON meetings(user_id)" },
-                    { name: "idx_reminders_user_sent", sql: "CREATE INDEX idx_reminders_user_sent ON reminders(user_id, sent)" },
-                ];
-
-                indexes.forEach(({ name, sql }) => {
-                    db.query(
-                        `SELECT COUNT(*) AS count FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = ?`,
-                        [name],
-                        (err, result) => {
-                            if (err) return console.error("Index check error:", err.message);
-                            if (result[0].count === 0) {
-                                db.query(sql, (err) => {
-                                    if (err) console.error("Index creation error:", err.message);
-                                    else console.log(`Index ${name} created successfully`);
-                                });
-                            }
-                        }
-                    );
-                });
-            }
         }
-    });
-});
+    }
+
+    const [draftBodyColumn] = await runStartupQuery(
+        `SELECT COUNT(*) AS count
+         FROM information_schema.columns
+         WHERE table_schema = DATABASE()
+           AND table_name = 'reminders'
+                     AND column_name = 'draft_body'`
+        );
+
+    if (draftBodyColumn[0].count === 0) {
+        await runStartupQuery("ALTER TABLE reminders ADD COLUMN draft_body TEXT DEFAULT NULL");
+        console.log("Column reminders.draft_body created successfully");
+    }
+
+    console.log("All tables verified/created successfully.");
+
+    const indexes = [
+        { name: "idx_companies_user_id", sql: "CREATE INDEX idx_companies_user_id ON companies(user_id)" },
+        { name: "idx_meetings_user_id", sql: "CREATE INDEX idx_meetings_user_id ON meetings(user_id)" },
+        { name: "idx_reminders_user_sent", sql: "CREATE INDEX idx_reminders_user_sent ON reminders(user_id, sent)" },
+    ];
+
+    for (const { name, sql } of indexes) {
+        try {
+            const [result] = await runStartupQuery(
+                `SELECT COUNT(*) AS count FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = ?`,
+                [name]
+            );
+
+            if (result[0].count === 0) {
+                await runStartupQuery(sql);
+                console.log(`Index ${name} created successfully`);
+            }
+        } catch (err) {
+            console.error("Index check error:", err.message);
+        }
+    }
+};
 
 const authenticateToken = (req, res, next) => {
     const token = req.headers["authorization"]?.split(" ")[1];
@@ -350,9 +365,9 @@ app.put("/settings", authenticateToken, (req, res) => {
     );
 });
 
-// Cron Job - every 2 minutes, per user smtp
 cron.schedule(process.env.CRON_SCHEDULE || "*/2 * * * *", () => {
     const now = new Date();
+    const sendAt = new Date(now.getTime() + 30 * 60 * 1000);
 
     db.query(
         `SELECT reminders.*, companies.company_name, users.smtp_email, users.smtp_pass
@@ -360,7 +375,7 @@ cron.schedule(process.env.CRON_SCHEDULE || "*/2 * * * *", () => {
          LEFT JOIN users ON reminders.user_id = users.id
          LEFT JOIN companies ON reminders.company_id = companies.id
          WHERE reminders.reminder_time <= ? AND reminders.sent = 0`,
-        [now],
+        [sendAt],
         (err, results) => {
             if (err) return console.log("Cron error:", err.message);
             if (results.length === 0) return;
@@ -823,11 +838,11 @@ app.post("/ai/summarize", authenticateToken, async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "You are a professional assistant. Please summarize the following meeting notes and provide a clear bulleted list of Action Items. Keep it concise."
+                    content: "You summarize meeting notes into a short, clear client-ready recap."
                 },
                 {
                     role: "user",
-                    content: notes
+                    content: `Summarize these notes in 3 to 5 concise bullet points:\n\n${notes}`
                 }
             ],
             model: process.env.GROQ_MODEL || "llama-3.1-8b-instant"
@@ -910,9 +925,17 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server Running on Port ${PORT}`);
-});
+
+initializeDatabase()
+    .then(() => {
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server Running on Port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error("Database initialization failed:", err.message);
+        process.exit(1);
+    });
 
 process.on("SIGINT", () => {
     db.end((err) => {

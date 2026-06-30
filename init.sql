@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS reminders (
     reminder_time DATETIME NOT NULL,
     email VARCHAR(255) NOT NULL,
     sent TINYINT DEFAULT 0,
+    draft_body TEXT DEFAULT NULL,
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
