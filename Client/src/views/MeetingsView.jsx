@@ -248,7 +248,7 @@ export default function MeetingsView() {
     };
 
     return (
-        <div className="space-y-6 animate-fadeIn">
+        <div className="page-shell space-y-6 animate-fadeIn">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -258,7 +258,7 @@ export default function MeetingsView() {
                 <button
                     onClick={openAddModal}
                     disabled={companies.length === 0}
-                    className="inline-flex items-center px-4.5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    className="inline-flex items-center px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-hover hover:shadow-md hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 >
                     <svg className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -288,7 +288,7 @@ export default function MeetingsView() {
 
             {/* Meetings Grid / Table */}
             {loading ? (
-                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-100/85 text-left">
                             <thead className="bg-slate-50/70">
@@ -326,7 +326,7 @@ export default function MeetingsView() {
                     </div>
                 </div>
             ) : meetings.length === 0 ? (
-                <div className="glass-panel rounded-2xl shadow-xs py-16 text-center border border-slate-100">
+                <div className="glass-panel rounded-3xl shadow-xs py-16 text-center border border-slate-100">
                     <svg className="mx-auto h-12 w-12 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -334,7 +334,7 @@ export default function MeetingsView() {
                     <p className="mt-2 text-xs text-slate-500">Document discussions and outcomes with your clients here.</p>
                 </div>
             ) : (
-                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden border border-slate-100/70">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-100/85 text-left">
                             <thead className="bg-slate-50/70">
@@ -387,7 +387,7 @@ export default function MeetingsView() {
                                                         <div>
                                                             <div className="bg-slate-50 p-2 rounded-md border border-slate-100 whitespace-pre-wrap">{lastNote}</div>
                                                             {parsedNotes.length > 1 && (
-                                                                <div className="text-[10px] text-slate-400 mt-1 italic font-medium cursor-pointer hover:text-indigo-500" onClick={() => openViewModal(meeting)}>
+                                                                <div className="text-[10px] text-slate-400 mt-1 italic font-medium cursor-pointer hover:text-primary" onClick={() => openViewModal(meeting)}>
                                                                     + {parsedNotes.length - 1} more note(s). Click View Details to see all.
                                                                 </div>
                                                             )}
@@ -398,7 +398,7 @@ export default function MeetingsView() {
                                         </td>
                                         <td className="px-6 py-4">
                                             {meeting.outcome ? (
-                                                <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-indigo-50 text-indigo-705 border border-indigo-100/50 shadow-xs">
+                                                <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-xs">
                                                     {meeting.outcome}
                                                 </span>
                                             ) : (
@@ -419,19 +419,19 @@ export default function MeetingsView() {
                                                 <div className="absolute right-8 top-10 w-40 bg-white border border-slate-200 shadow-lg rounded-xl z-10 py-1 overflow-hidden animate-fadeIn">
                                                     <button
                                                         onClick={() => { openViewModal(meeting); setActiveDropdown(null); }}
-                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium cursor-pointer"
+                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-medium cursor-pointer"
                                                     >
                                                         View Details
                                                     </button>
                                                     <button
                                                         onClick={() => { openEditModal(meeting); setActiveDropdown(null); }}
-                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium cursor-pointer"
+                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-medium cursor-pointer"
                                                     >
                                                         Edit
                                                     </button>
                                                     <button
                                                         onClick={() => { openRescheduleModal(meeting); setActiveDropdown(null); }}
-                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium cursor-pointer"
+                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-medium cursor-pointer"
                                                     >
                                                         Reschedule
                                                     </button>
@@ -455,10 +455,10 @@ export default function MeetingsView() {
 
             {/* Modals for Add & Edit */}
             {(showAddModal || showEditModal) && createPortal(
-                <div className="fixed inset-0 matte-modal-overlay overflow-y-auto flex items-center justify-center p-4 sm:p-6 z-50 animate-fadeIn">
-                    <div className="matte-glass-modal rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col relative overflow-hidden transform transition-all">
+                <div className="fixed inset-0 matte-modal-overlay overflow-y-auto flex items-end sm:items-center justify-center p-3 sm:p-6 z-50 animate-fadeIn">
+                    <div className="matte-glass-modal rounded-[1.75rem] max-w-lg w-full max-h-[92vh] flex flex-col relative overflow-hidden transform transition-all">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent z-0 pointer-events-none"></div>
+                        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent z-0 pointer-events-none"></div>
 
                         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-200/50 flex justify-between items-center relative z-10">
                             <div>
@@ -497,7 +497,7 @@ export default function MeetingsView() {
                                         disabled={showEditModal} // Keep linked to company during edit
                                         value={formData.company_id}
                                         onChange={(e) => setFormData(prev => ({ ...prev, company_id: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all cursor-pointer font-semibold shadow-sm appearance-none disabled:opacity-60"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all cursor-pointer font-semibold shadow-sm appearance-none disabled:opacity-60"
                                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                                     >
                                         {companies.map(c => <option key={c.id} value={c.id}>{c.company_name}</option>)}
@@ -511,7 +511,7 @@ export default function MeetingsView() {
                                         required
                                         value={formData.meeting_date}
                                         onChange={(e) => setFormData(prev => ({ ...prev, meeting_date: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-sm font-sans text-slate-700"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all shadow-sm font-sans text-slate-700"
                                     />
                                 </div>
 
@@ -521,7 +521,7 @@ export default function MeetingsView() {
                                         type="text"
                                         value={formData.attendees}
                                         onChange={(e) => setFormData(prev => ({ ...prev, attendees: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                         placeholder="e.g. John Doe, Jane Smith"
                                     />
                                 </div>
@@ -532,7 +532,7 @@ export default function MeetingsView() {
                                         type="text"
                                         value={formData.outcome}
                                         onChange={(e) => setFormData(prev => ({ ...prev, outcome: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                         placeholder="e.g. Scheduled demo, Signed contract"
                                     />
                                 </div>
@@ -564,7 +564,7 @@ export default function MeetingsView() {
                                             rows="2"
                                             value={newNote}
                                             onChange={(e) => setNewNote(e.target.value)}
-                                            className="flex-1 px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm resize-none custom-scrollbar"
+                                            className="flex-1 px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm resize-none custom-scrollbar"
                                             placeholder="Type a new note here..."
                                         />
                                         <button
@@ -575,7 +575,7 @@ export default function MeetingsView() {
                                                     setNewNote('');
                                                 }
                                             }}
-                                            className="px-4 py-3 bg-indigo-100 text-indigo-700 font-bold text-sm rounded-xl hover:bg-indigo-200 transition-all shadow-sm h-[66px] flex items-center justify-center cursor-pointer"
+                                            className="px-4 py-3 bg-primary/10 text-primary font-bold text-sm rounded-xl hover:bg-primary/20 transition-all shadow-sm h-[66px] flex items-center justify-center cursor-pointer"
                                         >
                                             Add
                                         </button>
@@ -583,7 +583,7 @@ export default function MeetingsView() {
                                             type="button"
                                             onClick={handleSummarizeNotes}
                                             disabled={isSummarizing}
-                                            className="px-4 py-3 bg-white text-indigo-600 border border-indigo-200 font-bold text-sm rounded-xl hover:bg-indigo-50 transition-all shadow-sm h-[66px] flex items-center justify-center cursor-pointer disabled:opacity-70 flex-shrink-0"
+                                            className="px-4 py-3 bg-white text-primary border border-primary/20 font-bold text-sm rounded-xl hover:bg-primary/5 transition-all shadow-sm h-[66px] flex items-center justify-center cursor-pointer disabled:opacity-70 flex-shrink-0"
                                         >
                                             {isSummarizing ? 'Summarizing...' : 'Summarize Notes'}
                                         </button>
@@ -601,7 +601,7 @@ export default function MeetingsView() {
                                     <button
                                         type="submit"
                                         disabled={formSaving}
-                                        className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                                        className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                                     >
                                         {formSaving ? (
                                             <>
@@ -630,8 +630,8 @@ export default function MeetingsView() {
 
             {/* View Details Modal */}
             {showViewModal && selectedMeeting && createPortal(
-                <div className="fixed inset-0 bg-slate-900/60 overflow-y-auto flex items-center justify-center p-4 sm:p-6 z-50 animate-fadeIn">
-                    <div className="glass-panel bg-white/80 rounded-3xl shadow-2xl border border-white/60 max-w-lg w-full flex flex-col relative overflow-hidden transform transition-all">
+                <div className="fixed inset-0 bg-slate-900/60 overflow-y-auto flex items-end sm:items-center justify-center p-3 sm:p-6 z-50 animate-fadeIn">
+                    <div className="glass-panel bg-white/80 rounded-[1.75rem] shadow-2xl border border-white/60 max-w-lg w-full flex flex-col relative overflow-hidden transform transition-all">
                         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-200/50 flex justify-between items-center">
                             <h3 className="font-extrabold text-xl text-slate-900">Meeting Details</h3>
                             <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
@@ -641,7 +641,7 @@ export default function MeetingsView() {
                             </button>
                         </div>
                         <div className="p-6 sm:p-8 space-y-5 text-sm overflow-y-auto max-h-[70vh] custom-scrollbar">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Company Name</p>
                                     <p className="font-semibold text-slate-900">{selectedMeeting.company_name}</p>
@@ -654,7 +654,7 @@ export default function MeetingsView() {
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-100 pt-4">
                                 <div>
                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Contact Person</p>
                                     <p className="font-semibold text-slate-900">{selectedMeeting.contact_person || 'N/A'}</p>
@@ -668,7 +668,7 @@ export default function MeetingsView() {
                             <div className="border-t border-slate-100 pt-4">
                                 <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Outcome</p>
                                 {selectedMeeting.outcome ? (
-                                    <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-indigo-50 text-indigo-705 border border-indigo-100/50">
+                                    <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-primary/10 text-primary border border-primary/20">
                                         {selectedMeeting.outcome}
                                     </span>
                                 ) : (
@@ -709,8 +709,8 @@ export default function MeetingsView() {
 
             {/* Reschedule Modal */}
             {showRescheduleModal && selectedMeeting && createPortal(
-                <div className="fixed inset-0 bg-slate-900/60 overflow-y-auto flex items-center justify-center p-4 sm:p-6 z-50 animate-fadeIn">
-                    <div className="glass-panel bg-white/80 rounded-3xl shadow-2xl border border-white/60 max-w-sm w-full flex flex-col relative overflow-hidden transform transition-all">
+                <div className="fixed inset-0 bg-slate-900/60 overflow-y-auto flex items-end sm:items-center justify-center p-3 sm:p-6 z-50 animate-fadeIn">
+                    <div className="glass-panel bg-white/80 rounded-[1.75rem] shadow-2xl border border-white/60 max-w-sm w-full flex flex-col relative overflow-hidden transform transition-all">
                         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-200/50 flex justify-between items-center relative z-10">
                             <div>
                                 <h3 className="font-extrabold text-xl tracking-tight text-slate-900 font-['Outfit']">Reschedule Meeting</h3>
@@ -735,7 +735,7 @@ export default function MeetingsView() {
                                     required
                                     value={rescheduleDate}
                                     onChange={(e) => setRescheduleDate(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-sm font-sans text-slate-700"
+                                    className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all shadow-sm font-sans text-slate-700"
                                 />
                             </div>
 
@@ -744,7 +744,7 @@ export default function MeetingsView() {
                                     type="checkbox"
                                     checked={sendRescheduleEmail}
                                     onChange={(e) => setSendRescheduleEmail(e.target.checked)}
-                                    className="w-4 h-4 text-indigo-600 bg-white border-slate-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                                    className="w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
                                 />
                                 <span className="text-sm font-medium text-slate-700">Send an email notification to the client</span>
                             </label>
@@ -759,7 +759,7 @@ export default function MeetingsView() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                    className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     Reschedule
                                 </button>

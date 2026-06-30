@@ -6,10 +6,10 @@ services:
     container_name: crm-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root_password}
-      MYSQL_DATABASE: crm
-      MYSQL_USER: ${DB_USER:-crm_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-crm_password}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your environment}
+      MYSQL_DATABASE: ${DB_NAME:-crm}
+      MYSQL_USER: ${DB_USER:?Set DB_USER in your environment}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your environment}
     ports:
       - "3306:3306"
     volumes:
@@ -34,13 +34,16 @@ services:
         condition: service_healthy
     environment:
       PORT: 3000
-      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_here}
-      REFRESH_SECRET: ${REFRESH_SECRET:-your_refresh_secret_here}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in your environment}
+      REFRESH_SECRET: ${REFRESH_SECRET:?Set REFRESH_SECRET in your environment}
       DB_HOST: db
-      DB_USER: ${DB_USER:-crm_user}
-      DB_PASSWORD: ${DB_PASSWORD:-crm_password}
-      DB_NAME: crm
+      DB_USER: ${DB_USER:?Set DB_USER in your environment}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your environment}
+      DB_NAME: ${DB_NAME:-crm}
       DB_PORT: 3306
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in your environment}
+      GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in your environment}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
       EMAIL_SERVICE: ${EMAIL_SERVICE}
       EMAIL_USER: ${EMAIL_USER}
       EMAIL_PASS: ${EMAIL_PASS}
@@ -50,7 +53,7 @@ services:
       context: ./Client
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL}
+        VITE_API_URL: ${VITE_API_URL:?Set VITE_API_URL in your environment}
     container_name: crm-frontend
     restart: always
     ports:

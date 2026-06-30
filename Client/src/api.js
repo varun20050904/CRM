@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
+if (!apiUrl) {
+    throw new Error('Missing required VITE_API_URL environment variable.');
+}
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+    baseURL: apiUrl,
     headers: {
         'Content-Type': 'application/json'
     }
@@ -64,7 +70,6 @@ api.interceptors.response.use(
             if (refreshToken) {
                 try {
                     // Call the refresh token endpoint without interceptor header if possible (or using a clean axios instance)
-                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
                     const response = await axios.post(`${apiUrl}/token`, { refreshToken });
                     const newToken = response.data.token;
 

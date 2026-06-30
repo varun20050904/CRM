@@ -93,7 +93,7 @@ function App() {
     if (fetchingProfile && !user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <svg className="animate-spin h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
@@ -102,16 +102,23 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+        <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans">
+            <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+                <div className="absolute -top-24 -left-28 h-72 w-72 rounded-full bg-primary/20 blur-3xl"></div>
+                <div className="absolute top-16 -right-16 h-80 w-80 rounded-full bg-secondary/18 blur-3xl"></div>
+                <div className="absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-olive/14 blur-3xl"></div>
+                <div className="absolute bottom-20 right-1/4 h-64 w-64 rounded-full bg-taupe/12 blur-3xl"></div>
+            </div>
+
             {/* Sidebar Desktop - fixed, never scrolls */}
-            <aside className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-64 bg-slate-950 text-slate-400 border-r border-slate-900 z-30">
-                <div className="h-20 flex items-center px-6 border-b border-slate-900 gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-indigo-500/30">
+            <aside className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-60 bg-slate-950/96 backdrop-blur-xl text-slate-300 border-r border-white/10 z-30 shadow-2xl shadow-slate-950/30 ring-1 ring-white/5">
+                <div className="h-20 flex items-center px-6 border-b border-white/10 gap-3">
+                    <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-extrabold text-base shadow-md shadow-primary/25">
                         CT
                     </div>
                     <div className="flex flex-col">
                         <span className="font-bold text-white text-sm tracking-wide">Client Tracker</span>
-                        <span className="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase">Enterprise CRM</span>
+                        <span className="text-[10px] text-secondary font-semibold tracking-wider uppercase">Relationship Hub</span>
                     </div>
                 </div>
 
@@ -120,8 +127,8 @@ function App() {
                         onClick={() => setCurrentPage('dashboard')}
                         className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
                             currentPage === 'dashboard'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-650/40'
-                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                : 'text-slate-400 hover:bg-white/6 hover:text-slate-100'
                         }`}
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,8 +141,8 @@ function App() {
                         onClick={() => setCurrentPage('companies')}
                         className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
                             currentPage === 'companies'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-650/40'
-                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                : 'text-slate-400 hover:bg-white/6 hover:text-slate-100'
                         }`}
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,8 +155,8 @@ function App() {
                         onClick={() => setCurrentPage('meetings')}
                         className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
                             currentPage === 'meetings'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-650/40'
-                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                : 'text-slate-400 hover:bg-white/6 hover:text-slate-100'
                         }`}
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,8 +169,8 @@ function App() {
                         onClick={() => setCurrentPage('reminders')}
                         className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
                             currentPage === 'reminders'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-650/40'
-                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                : 'text-slate-400 hover:bg-white/6 hover:text-slate-100'
                         }`}
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,8 +183,8 @@ function App() {
                         onClick={() => setCurrentPage('settings')}
                         className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
                             currentPage === 'settings'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-650/40'
-                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                : 'text-slate-400 hover:bg-white/6 hover:text-slate-100'
                         }`}
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,8 +197,8 @@ function App() {
 
                 {/* Profile panel bottom */}
                 {user && (
-                    <div className="p-4 border-t border-slate-900 flex items-center gap-3 bg-slate-950/80">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-inner">
+                    <div className="p-4 border-t border-slate-800 flex items-center gap-3 bg-slate-950/80">
+                        <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-black shadow-inner">
                             {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -201,7 +208,7 @@ function App() {
                         <button
                             onClick={handleLogout}
                             title="Sign out"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                         >
                             <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -212,17 +219,17 @@ function App() {
             </aside>
 
             {/* Right side: mobile topbar + main content, offset by sidebar width on desktop */}
-            <div className="flex flex-col min-h-screen md:ml-64">
-                <header className="md:hidden h-16 bg-slate-950 text-white flex items-center justify-between px-6 border-b border-slate-900 flex-shrink-0 z-20">
+            <div className="flex flex-col min-h-screen md:ml-60">
+                <header className="md:hidden h-16 bg-slate-950/95 backdrop-blur-xl text-white flex items-center justify-between px-4 sm:px-6 border-b border-white/10 shrink-0 z-20 shadow-lg shadow-slate-950/25">
                     <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-sm">
+                        <div className="h-8 w-8 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-primary/25">
                             CT
                         </div>
                         <span className="font-bold text-white text-sm tracking-wide">Client Tracker</span>
                     </div>
                     <button
                         onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-white"
+                            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
                     >
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
@@ -234,9 +241,9 @@ function App() {
                 {mobileSidebarOpen && (
                     <div className="md:hidden fixed inset-0 z-10 flex">
                         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs" onClick={() => setMobileSidebarOpen(false)}></div>
-                        <aside className="relative flex flex-col w-64 bg-slate-950 text-slate-400 h-full max-w-xs animate-slideRight">
-                            <div className="h-16 flex items-center px-6 border-b border-slate-900 gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
+                        <aside className="relative flex flex-col w-72 max-w-[86vw] bg-slate-950 text-slate-300 h-full animate-slideRight shadow-2xl shadow-slate-950/40 ring-1 ring-white/5">
+                            <div className="h-16 flex items-center px-6 border-b border-white/10 gap-3">
+                                <div className="h-8 w-8 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-black text-sm">
                                     CT
                                 </div>
                                 <span className="font-bold text-white text-sm tracking-wide">Client Tracker</span>
@@ -246,7 +253,7 @@ function App() {
                                 <button
                                     onClick={() => { setCurrentPage('dashboard'); setMobileSidebarOpen(false); }}
                                     className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
-                                        currentPage === 'dashboard' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                        currentPage === 'dashboard' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                                     }`}
                                 >
                                     Dashboard
@@ -254,7 +261,7 @@ function App() {
                                 <button
                                     onClick={() => { setCurrentPage('companies'); setMobileSidebarOpen(false); }}
                                     className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
-                                        currentPage === 'companies' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                        currentPage === 'companies' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                                     }`}
                                 >
                                     Companies
@@ -262,7 +269,7 @@ function App() {
                                 <button
                                     onClick={() => { setCurrentPage('meetings'); setMobileSidebarOpen(false); }}
                                     className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
-                                        currentPage === 'meetings' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                        currentPage === 'meetings' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                                     }`}
                                 >
                                     Meetings
@@ -270,7 +277,7 @@ function App() {
                                 <button
                                     onClick={() => { setCurrentPage('reminders'); setMobileSidebarOpen(false); }}
                                     className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
-                                        currentPage === 'reminders' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                        currentPage === 'reminders' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                                     }`}
                                 >
                                     Reminders
@@ -278,7 +285,7 @@ function App() {
                                 <button
                                     onClick={() => { setCurrentPage('settings'); setMobileSidebarOpen(false); }}
                                     className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 gap-3 cursor-pointer ${
-                                        currentPage === 'settings' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                                        currentPage === 'settings' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                                     }`}
                                 >
                                     Settings
@@ -286,8 +293,8 @@ function App() {
                             </nav>
 
                             {user && (
-                                <div className="p-4 border-t border-slate-900 flex items-center gap-3 bg-slate-950/80">
-                                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
+                                <div className="p-4 border-t border-white/10 flex items-center gap-3 bg-slate-950/80">
+                                    <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-black">
                                         {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -309,8 +316,10 @@ function App() {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 overflow-y-auto px-6 py-8 md:px-12 md:py-10">
-                    {renderContent()}
+                <main className="relative flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 lg:px-10 lg:py-8 pb-10">
+                    <div className="page-shell w-full">
+                        {renderContent()}
+                    </div>
                 </main>
             </div>
         </div>

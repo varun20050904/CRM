@@ -177,13 +177,13 @@ export default function CompaniesView() {
             case 'Closed Lost': return 'bg-rose-100 text-rose-800';
             case 'Proposal Sent': return 'bg-sky-100 text-sky-800';
             case 'Meeting Scheduled': return 'bg-amber-100 text-amber-800';
-            case 'In Progress': return 'bg-indigo-100 text-indigo-800';
+            case 'In Progress': return 'bg-primary/10 text-primary border border-primary/20';
             default: return 'bg-slate-100 text-slate-800';
         }
     };
 
     return (
-        <div className="space-y-6 animate-fadeIn">
+        <div className="page-shell space-y-6 animate-fadeIn">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -192,7 +192,7 @@ export default function CompaniesView() {
                 </div>
                 <button
                     onClick={openAddModal}
-                    className="inline-flex items-center px-4.5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold rounded-xl hover:shadow-md hover:shadow-indigo-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    className="inline-flex items-center px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-hover hover:shadow-md hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 >
                     <svg className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -214,7 +214,7 @@ export default function CompaniesView() {
             )}
 
             {/* Filters Bar */}
-            <div className="glass-panel p-4 rounded-2xl shadow-xs flex flex-col md:flex-row gap-4 justify-between border border-slate-100/70">
+            <div className="glass-panel p-4 rounded-3xl shadow-xs flex flex-col md:flex-row gap-4 justify-between border border-slate-100/70">
                 <div className="flex-1 relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,7 +226,7 @@ export default function CompaniesView() {
                         placeholder="Search by company name, contact or email..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 block w-full px-3.5 py-2.5 border border-slate-200/80 rounded-xl text-sm placeholder-slate-455 focus:outline-hidden focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 bg-white/60 transition-all"
+                        className="pl-10 block w-full px-3.5 py-2.5 border border-slate-200/80 rounded-xl text-sm placeholder-slate-455 focus:outline-hidden focus:ring-4 focus:ring-primary/10 focus:border-primary bg-white/60 transition-all"
                     />
                 </div>
                 <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export default function CompaniesView() {
                     <select
                         value={stageFilter}
                         onChange={(e) => setStageFilter(e.target.value)}
-                        className="block px-3.5 py-2.5 border border-slate-200/80 rounded-xl text-sm bg-white/80 focus:outline-hidden focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer font-medium"
+                        className="block px-3.5 py-2.5 border border-slate-200/80 rounded-xl text-sm bg-white/80 focus:outline-hidden focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all cursor-pointer font-medium"
                     >
                         <option value="All">All Stages</option>
                         {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -244,7 +244,7 @@ export default function CompaniesView() {
 
             {/* Companies Grid / Table */}
             {loading ? (
-                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-100/85 text-left">
                             <thead className="bg-slate-50/70">
@@ -274,7 +274,7 @@ export default function CompaniesView() {
                     </div>
                 </div>
             ) : filteredCompanies.length === 0 ? (
-                <div className="glass-panel rounded-2xl shadow-xs py-16 text-center border border-slate-100">
+                <div className="glass-panel rounded-3xl shadow-xs py-16 text-center border border-slate-100">
                     <svg className="mx-auto h-12 w-12 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
@@ -282,7 +282,7 @@ export default function CompaniesView() {
                     <p className="mt-2 text-xs text-slate-500">Get started by creating a new client organization record.</p>
                 </div>
             ) : (
-                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden border border-slate-100/70">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-100/85 text-left">
                             <thead className="bg-slate-50/70">
@@ -312,7 +312,7 @@ export default function CompaniesView() {
                                                 <select
                                                     value={company.stage}
                                                     onChange={(e) => handleStageChange(company.id, e.target.value)}
-                                                    className={`px-3 py-1.5 text-xs font-bold rounded-full border border-transparent focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 cursor-pointer transition-all shadow-xs ${getStageColor(company.stage)}`}
+                                                    className={`px-3 py-1.5 text-xs font-bold rounded-full border border-transparent focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all shadow-xs ${getStageColor(company.stage)}`}
                                                 >
                                                     {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
                                                 </select>
@@ -332,13 +332,13 @@ export default function CompaniesView() {
                                                 <div className="absolute right-8 top-10 w-40 bg-white border border-slate-200 shadow-lg rounded-xl z-10 py-1 overflow-hidden animate-fadeIn">
                                                     <button
                                                         onClick={() => { openViewModal(company); setActiveDropdown(null); }}
-                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium"
+                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-medium"
                                                     >
                                                         View Details
                                                     </button>
                                                     <button
                                                         onClick={() => { openEditModal(company); setActiveDropdown(null); }}
-                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium"
+                                                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-medium"
                                                     >
                                                         Edit
                                                     </button>
@@ -362,10 +362,10 @@ export default function CompaniesView() {
 
             {/* Modals for Add & Edit */}
             {(showAddModal || showEditModal) && createPortal(
-                <div className="fixed inset-0 matte-modal-overlay overflow-y-auto flex items-center justify-center p-4 sm:p-6 z-50 animate-fadeIn">
-                    <div className="matte-glass-modal rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col relative overflow-hidden transform transition-all">
+                <div className="fixed inset-0 matte-modal-overlay overflow-y-auto flex items-end sm:items-center justify-center p-3 sm:p-6 z-50 animate-fadeIn">
+                    <div className="matte-glass-modal rounded-[1.75rem] max-w-lg w-full max-h-[92vh] flex flex-col relative overflow-hidden transform transition-all">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent z-0 pointer-events-none"></div>
+                        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent z-0 pointer-events-none"></div>
 
                         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-200/50 flex justify-between items-center relative z-10">
                             <div>
@@ -405,7 +405,7 @@ export default function CompaniesView() {
                                         required
                                         value={formData.company_name}
                                         onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                         placeholder="e.g. Acme Corp"
                                     />
                                 </div>
@@ -416,7 +416,7 @@ export default function CompaniesView() {
                                         type="text"
                                         value={formData.contact_person}
                                         onChange={(e) => setFormData(prev => ({ ...prev, contact_person: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                         placeholder="e.g. Sarah Jenkins"
                                     />
                                 </div>
@@ -429,7 +429,7 @@ export default function CompaniesView() {
                                             required
                                             value={formData.email}
                                             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                                            className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                            className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                             placeholder="contact@acme.com"
                                         />
                                     </div>
@@ -439,7 +439,7 @@ export default function CompaniesView() {
                                             type="text"
                                             value={formData.phone}
                                             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                                            className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                            className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                             placeholder="+1 555-0199"
                                         />
                                     </div>
@@ -450,7 +450,7 @@ export default function CompaniesView() {
                                     <select
                                         value={formData.stage}
                                         onChange={(e) => setFormData(prev => ({ ...prev, stage: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all cursor-pointer font-semibold shadow-sm appearance-none"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all cursor-pointer font-semibold shadow-sm appearance-none"
                                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                                     >
                                         {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -468,7 +468,7 @@ export default function CompaniesView() {
                                     <button
                                         type="submit"
                                         disabled={formSaving}
-                                        className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                                        className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                                     >
                                         {formSaving ? (
                                             <>
@@ -497,8 +497,8 @@ export default function CompaniesView() {
 
             {/* View Details Modal */}
             {showViewModal && selectedCompany && createPortal(
-                <div className="fixed inset-0 bg-slate-900/60 overflow-y-auto flex items-center justify-center p-4 sm:p-6 z-50 animate-fadeIn">
-                    <div className="glass-panel bg-white/80 rounded-3xl shadow-2xl border border-white/60 max-w-md w-full flex flex-col relative overflow-hidden transform transition-all">
+                <div className="fixed inset-0 bg-slate-900/60 overflow-y-auto flex items-end sm:items-center justify-center p-3 sm:p-6 z-50 animate-fadeIn">
+                    <div className="glass-panel bg-white/80 rounded-[1.75rem] shadow-2xl border border-white/60 max-w-md w-full flex flex-col relative overflow-hidden transform transition-all">
                         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-200/50 flex justify-between items-center">
                             <h3 className="font-extrabold text-xl text-slate-900">Company Details</h3>
                             <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition-colors">

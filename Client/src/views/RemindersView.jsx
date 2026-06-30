@@ -165,13 +165,13 @@ export default function RemindersView() {
     };
 
     return (
-        <div className="space-y-6 animate-fadeIn">
+        <div className="page-shell space-y-6 animate-fadeIn">
 
             {/* AI Email Drafter Panel */}
             <div className="glass-panel rounded-2xl border border-slate-100/70 shadow-xs overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <div className="p-2 bg-indigo-50 rounded-lg">
-                        <svg className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                        <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
@@ -188,7 +188,7 @@ export default function RemindersView() {
                                 value={draftCompanyId}
                                 onChange={e => setDraftCompanyId(e.target.value)}
                                 disabled={companies.length === 0}
-                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all font-semibold appearance-none"
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all font-semibold appearance-none"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                             >
                                 {companies.map(c => <option key={c.id} value={c.id}>{c.company_name}</option>)}
@@ -199,7 +199,7 @@ export default function RemindersView() {
                             <select
                                 value={draftTone}
                                 onChange={e => setDraftTone(e.target.value)}
-                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all font-semibold appearance-none"
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all font-semibold appearance-none"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                             >
                                 <option value="professional">Professional</option>
@@ -219,7 +219,7 @@ export default function RemindersView() {
                         type="button"
                         onClick={handleDraftEmail}
                         disabled={isDrafting || companies.length === 0}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                     >
                         {isDrafting ? (
                             <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>Drafting...</>
@@ -265,7 +265,7 @@ export default function RemindersView() {
                 <button
                     onClick={openAddModal}
                     disabled={companies.length === 0}
-                    className="inline-flex items-center px-4.5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold rounded-xl hover:shadow-md hover:shadow-indigo-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"                >
+                    className="inline-flex items-center px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-hover hover:shadow-md hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"                >
                     <svg className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
                     </svg>
@@ -294,7 +294,7 @@ export default function RemindersView() {
 
             {/* Reminders List */}
             {loading ? (
-                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden border border-slate-100/70 animate-pulse">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-100/85 text-left">
                             <thead className="bg-slate-50/70">
@@ -321,7 +321,7 @@ export default function RemindersView() {
                     </div>
                 </div>
             ) : reminders.length === 0 ? (
-                <div className="glass-panel rounded-2xl shadow-xs py-16 text-center border border-slate-100">
+                <div className="glass-panel rounded-3xl shadow-xs py-16 text-center border border-slate-100">
                     <svg className="mx-auto h-12 w-12 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
@@ -329,7 +329,7 @@ export default function RemindersView() {
                     <p className="mt-2 text-xs text-slate-500">Configure notifications to trigger emails automatically.</p>
                 </div>
             ) : (
-                <div className="glass-panel rounded-2xl shadow-xs overflow-hidden border border-slate-100/70">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden border border-slate-100/70">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-100/85 text-left">
                             <thead className="bg-slate-50/70">
@@ -389,10 +389,10 @@ export default function RemindersView() {
 
             {/* Modals for Add Reminder */}
             {showAddModal && createPortal(
-                <div className="fixed inset-0 matte-modal-overlay overflow-y-auto flex items-center justify-center p-4 sm:p-6 z-50 animate-fadeIn">
-                    <div className="matte-glass-modal rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col relative overflow-hidden transform transition-all">
+                <div className="fixed inset-0 matte-modal-overlay overflow-y-auto flex items-end sm:items-center justify-center p-3 sm:p-6 z-50 animate-fadeIn">
+                    <div className="matte-glass-modal rounded-[1.75rem] max-w-lg w-full max-h-[92vh] flex flex-col relative overflow-hidden transform transition-all">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent z-0 pointer-events-none"></div>
+                        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent z-0 pointer-events-none"></div>
 
                         <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-200/50 flex justify-between items-center relative z-10">
                             <div>
@@ -430,7 +430,7 @@ export default function RemindersView() {
                                     <select
                                         value={formData.company_id}
                                         onChange={(e) => handleCompanyChange(e.target.value)}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all cursor-pointer font-semibold shadow-sm appearance-none"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all cursor-pointer font-semibold shadow-sm appearance-none"
                                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                                     >
                                         <option value="" disabled>-- Select Company --</option>
@@ -445,7 +445,7 @@ export default function RemindersView() {
                                         required
                                         value={formData.email}
                                         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder-slate-400 shadow-sm"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all placeholder-slate-400 shadow-sm"
                                         placeholder="e.g. alert@company.com"
                                     />
                                 </div>
@@ -457,7 +457,7 @@ export default function RemindersView() {
                                         required
                                         value={formData.reminder_time}
                                         onChange={(e) => setFormData(prev => ({ ...prev, reminder_time: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-sm font-sans text-slate-700"
+                                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-md border border-slate-200/80 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/15 focus:border-primary transition-all shadow-sm font-sans text-slate-700"
                                     />
                                     <p className="mt-2 text-[11px] text-slate-500 font-medium">The cron job runs every minute to process and trigger pending email alerts.</p>
                                 </div>
@@ -473,7 +473,7 @@ export default function RemindersView() {
                                     <button
                                         type="submit"
                                         disabled={formSaving}
-                                        className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                                        className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                                     >
                                         {formSaving ? (
                                             <>

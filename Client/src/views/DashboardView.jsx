@@ -147,7 +147,7 @@ export default function DashboardView() {
     }
 
     return (
-        <div className="space-y-8 animate-fadeIn">
+        <div className="page-shell space-y-8 animate-fadeIn">
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
@@ -157,8 +157,8 @@ export default function DashboardView() {
             {/* Metrics cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Companies Card */}
-                <div className="glass-panel premium-card p-6 rounded-2xl flex items-center space-x-4 shadow-xs">
-                    <div className="p-3.5 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl shadow-md shadow-indigo-500/20">
+                <div className="glass-panel premium-card p-6 rounded-3xl flex items-center space-x-4 shadow-xs">
+                    <div className="p-3.5 bg-primary text-white rounded-2xl shadow-md shadow-primary/20">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
@@ -170,8 +170,8 @@ export default function DashboardView() {
                 </div>
 
                 {/* Meetings Card */}
-                <div className="glass-panel premium-card p-6 rounded-2xl flex items-center space-x-4 shadow-xs">
-                    <div className="p-3.5 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl shadow-md shadow-emerald-500/20">
+                <div className="glass-panel premium-card p-6 rounded-3xl flex items-center space-x-4 shadow-xs">
+                    <div className="p-3.5 bg-secondary text-white rounded-2xl shadow-md shadow-secondary/20">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -183,8 +183,8 @@ export default function DashboardView() {
                 </div>
 
                 {/* Reminders Card */}
-                <div className="glass-panel premium-card p-6 rounded-2xl flex items-center space-x-4 shadow-xs">
-                    <div className="p-3.5 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl shadow-md shadow-amber-500/20">
+                <div className="glass-panel premium-card p-6 rounded-3xl flex items-center space-x-4 shadow-xs">
+                    <div className="p-3.5 bg-taupe text-white rounded-2xl shadow-md shadow-taupe/20">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
@@ -196,8 +196,8 @@ export default function DashboardView() {
                 </div>
 
                 {/* Pending Reminders Card */}
-                <div className="glass-panel premium-card p-6 rounded-2xl flex items-center space-x-4 shadow-xs">
-                    <div className="p-3.5 bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-xl shadow-md shadow-rose-500/20">
+                <div className="glass-panel premium-card p-6 rounded-3xl flex items-center space-x-4 shadow-xs">
+                    <div className="p-3.5 bg-olive text-white rounded-2xl shadow-md shadow-olive/20">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -212,7 +212,7 @@ export default function DashboardView() {
             {/* Analytics Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Meetings Bar Chart */}
-                <div className="glass-panel p-6 rounded-2xl shadow-xs h-80 flex flex-col">
+                <div className="glass-panel p-6 rounded-3xl shadow-xs h-80 flex flex-col">
                     <h3 className="text-lg font-bold text-slate-900 mb-4">Meetings Over Time</h3>
                     {chartData.meetingsPerMonth.length === 0 ? (
                         <p className="text-sm text-slate-500 italic flex-1 flex items-center justify-center">No meeting data available.</p>
@@ -224,7 +224,7 @@ export default function DashboardView() {
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} allowDecimals={false} />
                                     <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                    <Bar dataKey="meetings" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="meetings" fill="#5C8DC5" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -232,7 +232,7 @@ export default function DashboardView() {
                 </div>
 
                 {/* Companies Pie Chart */}
-                <div className="glass-panel p-6 rounded-2xl shadow-xs h-80 flex flex-col">
+                <div className="glass-panel p-6 rounded-3xl shadow-xs h-80 flex flex-col">
                     <h3 className="text-lg font-bold text-slate-900 mb-4">Companies by Stage</h3>
                     {chartData.companiesByStage.length === 0 ? (
                         <p className="text-sm text-slate-500 italic flex-1 flex items-center justify-center">No company data available.</p>
@@ -250,7 +250,7 @@ export default function DashboardView() {
                                         dataKey="value"
                                     >
                                         {chartData.companiesByStage.map((entry, index) => {
-                                            const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
+                                            const COLORS = ['#5C8DC5', '#909EAE', '#AD9E90', '#736F60', '#637a93', '#4e545c'];
                                             return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
                                         })}
                                     </Pie>
@@ -266,10 +266,10 @@ export default function DashboardView() {
             {/* Content Lists */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Recent Companies */}
-                <div className="glass-panel p-6 rounded-2xl shadow-xs space-y-5">
+                <div className="glass-panel p-6 rounded-3xl shadow-xs space-y-5">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-bold text-slate-900">Recent Companies</h3>
-                        <span className="text-xs font-semibold text-indigo-650 bg-indigo-50 px-2.5 py-1 rounded-md">Updates</span>
+                        <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-md">Updates</span>
                     </div>
                     {recentCompanies.length === 0 ? (
                         <p className="text-sm text-slate-500 italic">No companies added yet.</p>
@@ -286,7 +286,7 @@ export default function DashboardView() {
                                         company.stage === 'Closed Lost' ? 'bg-rose-50 text-rose-700 border border-rose-100/50' :
                                         company.stage === 'Proposal Sent' ? 'bg-sky-50 text-sky-700 border border-sky-100/50' :
                                         company.stage === 'Meeting Scheduled' ? 'bg-amber-50 text-amber-700 border border-amber-100/50' :
-                                        company.stage === 'In Progress' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100/50' :
+                                        company.stage === 'In Progress' ? 'bg-primary/10 text-primary border border-primary/20' :
                                         'bg-slate-50 text-slate-700 border border-slate-150'
                                     }`}>
                                         {company.stage}
@@ -298,7 +298,7 @@ export default function DashboardView() {
                 </div>
 
                 {/* Recent Meetings */}
-                <div className="glass-panel p-6 rounded-2xl shadow-xs space-y-5">
+                <div className="glass-panel p-6 rounded-3xl shadow-xs space-y-5">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-bold text-slate-900">Upcoming / Recent Meetings</h3>
                         <span className="text-xs font-semibold text-emerald-650 bg-emerald-50 px-2.5 py-1 rounded-md">Logs</span>
